@@ -8,7 +8,7 @@ pub fn view(_connected: bool, status: &str) -> Element<'_, Message> {
 
     let red_button = button("Red")
         .style(styles::rounded_button)
-        .on_press(Message::SetColor(255, 0, 0));
+        .on_press(Message::SetColor(255, 51, 255));
 
     let green_button = button("Green")
         .style(styles::rounded_button)

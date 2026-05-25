@@ -15,6 +15,14 @@ impl LuxaforDevice {
         Ok(Self { device })
     }
 
+    pub fn is_connected() -> Result<bool, HidError> {
+        let api = HidApi::new()?;
+        api.device_list()
+            .find(|d| d.vendor_id() == VENDOR_ID && d.product_id() == PRODUCT_ID)
+            .map(|_| true)
+            .ok_or(HidError::HidApiError {message: "Device not found.".to_string()})
+    }
+
     pub fn send_command(&self, report: [u8; REPORT_SIZE]) -> Result<(), HidError> {
         self.device.write(&report)?;
         Ok(())

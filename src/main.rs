@@ -5,5 +5,8 @@ mod ui;
 use crate::app::App;
 
 fn main() -> iced::Result {
-    iced::run(App::update, App::view)
+    iced::application(App::default, App::update, App::view)
+        .title("Luxafor Control App")
+        .subscription(App::subscription)
+        .run()
 }
