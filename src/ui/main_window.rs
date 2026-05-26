@@ -1,19 +1,22 @@
-use iced::widget::{button, column, container, radio, row, text, slider, text_input};
+use iced::widget::{button, column, container, radio, row, slider, text, text_input};
 use iced::{Alignment, Color, Element, Length};
-use crate::app::{Message, mode::{Mode, WaveType}};
+use crate::app::{Message, mode::{Mode, WaveType, WaveActiveColor}};
 
 pub fn view<'a>(
     _connected: bool,
-    status: &str,
+    status: &'a str,
     r: u8,
     g: u8,
     b: u8,
-    hex_input: &str,
+    hex_input: &'a str,
     hex_valid: bool,
     mode: &'a Mode,
     speed: u8,
     repeat: u8,
-    wave_type: &'a WaveType
+    wave_type: &'a WaveType,
+    wave_color_a: (u8, u8, u8),
+    wave_color_b: (u8, u8, u8),
+    wave_active_color: &'a WaveActiveColor,
 ) -> Element<'a, Message> {
     let preview_color = Color::from_rgb(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0);
 
@@ -58,75 +61,79 @@ pub fn view<'a>(
         .spacing(5)
         .align_y(Alignment::Center);
 
-    // Mode selector
     let mode_selector = row![
-        radio("Static", Mode::Static, Some(mode.clone()), Message::ModeChanged),
-        radio("Fade", Mode::Fade, Some(mode.clone()), Message::ModeChanged),
-        radio("Strobe", Mode::Strobe, Some(mode.clone()), Message::ModeChanged),
-        radio("Wave", Mode::Wave, Some(mode.clone()), Message::ModeChanged),
+        radio("Static", Mode::Static, Some(*mode), Message::ModeChanged),
+        radio("Fade", Mode::Fade, Some(*mode), Message::ModeChanged),
+        radio("Strobe", Mode::Strobe, Some(*mode), Message::ModeChanged),
+        radio("Wave", Mode::Wave, Some(*mode), Message::ModeChanged),
     ]
         .spacing(15)
         .align_y(Alignment::Center);
 
-    // Mode specific controls
+    let speed_row = row![
+        text("Speed").width(60),
+        slider(0..=255, speed, Message::SpeedChanged),
+        text(speed.to_string()).width(40),
+    ]
+        .spacing(10)
+        .align_y(Alignment::Center);
+
+    let repeat_row = row![
+        text("Repeat").width(60),
+        slider(0..=255, repeat, Message::RepeatChanged),
+        text(repeat.to_string()).width(40),
+    ]
+        .spacing(10)
+        .align_y(Alignment::Center);
+
     let mode_controls = match mode {
         Mode::Static => column![].spacing(10),
-        Mode::Fade => column![
-            row![
-                text("Speed").width(60),
-                slider(0..=255, speed, Message::SpeedChanged),
-                text(speed.to_string()).width(40),
+        Mode::Fade => column![speed_row].spacing(10),
+        Mode::Strobe => column![speed_row, repeat_row].spacing(10),
+        Mode::Wave => {
+            let color_a_preview = color_preview(wave_color_a);
+
+            let color_b_preview = color_preview(wave_color_b);
+
+            let color_selector = if wave_type.uses_two_colors() {
+                row![
+                radio("Color 1", WaveActiveColor::A, Some(*wave_active_color), Message::WaveActiveColorChanged),
+                color_a_preview,
+                radio("Color 2", WaveActiveColor::B, Some(*wave_active_color), Message::WaveActiveColorChanged),
+                color_b_preview,
             ]
-            .spacing(10)
-            .align_y(Alignment::Center),
-        ]
-            .spacing(10),
-        Mode::Strobe => column![
-            row![
-                text("Speed").width(60),
-                slider(0..=255, speed, Message::SpeedChanged),
-                text(speed.to_string()).width(40),
-            ]
-            .spacing(10)
-            .align_y(Alignment::Center),
-            row![
-                text("Repeat").width(60),
-                slider(0..=255, repeat, Message::RepeatChanged),
-                text(repeat.to_string()).width(40),
-            ]
-            .spacing(10)
-            .align_y(Alignment::Center),
-        ]
-            .spacing(10),
-        Mode::Wave => column![
-            row![
-                text("Speed").width(60),
-                slider(0..=255, speed, Message::SpeedChanged),
-                text(speed.to_string()).width(40),
-            ]
-            .spacing(10)
-            .align_y(Alignment::Center),
-            row![
-                text("Repeat").width(60),
-                slider(0..=255, repeat, Message::RepeatChanged),
-                text(repeat.to_string()).width(40),
-            ]
-            .spacing(10)
-            .align_y(Alignment::Center),
-            row(
+                    .spacing(10)
+                    .align_y(Alignment::Center)
+            } else {
+                row![
+                    radio("Color", WaveActiveColor::B, Some(*wave_active_color), Message::WaveActiveColorChanged),
+                    color_b_preview,
+                ]
+                    .spacing(10)
+                    .align_y(Alignment::Center)
+            };
+
+            let wave_type_row = row(
                 WaveType::all().into_iter().map(|wt| {
                     radio(
                         wt.label(),
-                        wt.clone(),
-                        Some(wave_type.clone()),
+                        wt,
+                        Some(*wave_type),
                         Message::WaveTypeChanged,
                     ).into()
                 }).collect::<Vec<_>>()
             )
-            .spacing(10)
-            .align_y(Alignment::Center),
-        ]
-            .spacing(10),
+                .spacing(10)
+                .align_y(Alignment::Center);
+
+            column![
+                color_selector,
+                speed_row,
+                repeat_row,
+                wave_type_row,
+            ]
+                .spacing(10)
+        }
     };
 
     let apply_button = button("Apply")
@@ -141,14 +148,12 @@ pub fn view<'a>(
         .spacing(10)
         .align_y(Alignment::Center);
 
-    let status_color = if hex_valid {
-        Color::from_rgb(0.0, 0.0, 0.0)
+    let status_text = if hex_valid {
+        text(format!("Status: {}", status))
     } else {
-        Color::from_rgb(0.8, 0.0, 0.0)
+        text(format!("Status: {}", status))
+            .color(Color::from_rgb(0.8, 0.0, 0.0))
     };
-
-    let status_text = text(format!("Status: {}", status))
-        .color(status_color);
 
     let content = column![
         preview,
@@ -168,4 +173,18 @@ pub fn view<'a>(
         .width(Length::Fill)
         .height(Length::Fill)
         .into()
+}
+
+fn color_preview(color: (u8, u8, u8)) -> container::Container<'static, Message> {
+    container("")
+        .width(60)
+        .height(30)
+        .style(move |_theme| container::Style {
+            background: Some(Color::from_rgb(
+                color.0 as f32 / 255.0,
+                color.1 as f32 / 255.0,
+                color.2 as f32 / 255.0,
+            ).into()),
+            ..Default::default()
+        })
 }
