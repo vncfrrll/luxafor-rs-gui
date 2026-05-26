@@ -22,12 +22,12 @@ name = "Luxafor Control App"
 identifier = "com.overfl0w.luxafor-rs-gui"
 version = "0.1.0"
 description = "A cross-platform GUI controller for the Luxafor USB busy flag"
-formats = ["deb", "wix", "dmg"]
+formats = ["deb", "nsis", "dmg"]
 icons = [
+    "assets/icon.ico",
     "assets/icons/icon_32.png",
     "assets/icons/icon_128.png",
     "assets/icons/icon_256.png",
     "assets/icons/icon_512.png",
-    "assets/icon.ico",
     "assets/icon.icns",
 ]
