@@ -19,6 +19,7 @@ name = "Luxafor Control App"
 identifier = "com.overfl0w.luxafor-rs-gui"
 version = "0.1.0"
 description = "A cross-platform GUI controller for the Luxafor USB busy flag"
+formats = ["deb", "wix", "dmg"]
 icons = [
     "assets/icons/icon_32.png",
     "assets/icons/icon_128.png",
@@ -27,12 +28,3 @@ icons = [
     "assets/icon.ico",
     "assets/icon.icns",
 ]
-
-[package.metadata.packager.linux]
-formats = ["deb"]
-
-[package.metadata.packager.windows]
-formats = ["msi"]
-
-[package.metadata.packager.macos]
-formats = ["dmg"]
