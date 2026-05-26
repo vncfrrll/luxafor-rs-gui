@@ -1,3 +1,6 @@
+pub mod mode;
+pub use mode::{Mode, WaveType};
+
 use std::time::Duration;
 use iced::{Element, Task, Subscription, time};
 use crate::luxafor::LuxaforDevice;
@@ -12,6 +15,10 @@ pub enum Message {
     TurnOff,
     _CommandSent(Result<(), String>),
     Poll,
+    ModeChanged(Mode),
+    SpeedChanged(u8),
+    RepeatChanged(u8),
+    WaveTypeChanged(WaveType),
 }
 
 pub struct App {
@@ -22,6 +29,10 @@ pub struct App {
     b: u8,
     hex_input: String,
     hex_valid: bool,
+    mode: Mode,
+    speed: u8,
+    repeat: u8,
+    wave_type: WaveType,
 }
 
 impl Default for App {
@@ -41,6 +52,10 @@ impl Default for App {
             b: 0,
             hex_input: "000000".to_string(),
             hex_valid: true,
+            mode: Mode::Static,
+            speed: 128,
+            repeat: 1,
+            wave_type: WaveType::Short,
         }
     }
 }
@@ -76,13 +91,37 @@ impl App {
             }
             Message::ApplyColor => {
                 if let Some(device) = &self.device {
-                    let result = device.set_color(self.r, self.g, self.b)
-                        .map_err(|e| e.to_string());
+                    let result = match self.mode {
+                        Mode::Static => device.set_color(self.r, self.g, self.b)
+                            .map_err(|e| e.to_string()),
+                        Mode::Fade => device.fade(self.r, self.g, self.b, self.speed)
+                            .map_err(|e| e.to_string()),
+                        Mode::Strobe => device.strobe(self.r, self.g, self.b, self.speed, self.repeat)
+                            .map_err(|e| e.to_string()),
+                        Mode::Wave => device.wave(self.r, self.g, self.b, self.wave_type.to_byte(), self.speed, self.repeat)
+                            .map_err(|e| e.to_string()),
+                    };
                     self.status = match &result {
                         Ok(_) => format!("Color set to #{:02X}{:02X}{:02X}.", self.r, self.g, self.b),
                         Err(e) => format!("Error: {}", e),
                     };
                 }
+                Task::none()
+            }
+            Message::ModeChanged(mode) => {
+                self.mode = mode;
+                Task::none()
+            }
+            Message::SpeedChanged(speed) => {
+                self.speed = speed;
+                Task::none()
+            }
+            Message::RepeatChanged(repeat) => {
+                self.repeat = repeat;
+                Task::none()
+            }
+            Message::WaveTypeChanged(wave_type) => {
+                self.wave_type = wave_type;
                 Task::none()
             }
             Message::TurnOff => {
@@ -131,6 +170,10 @@ impl App {
             self.b,
             &self.hex_input,
             self.hex_valid,
+            &self.mode,
+            self.speed,
+            self.repeat,
+            &self.wave_type,
         )
     }
 

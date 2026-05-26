@@ -33,6 +33,21 @@ impl LuxaforDevice {
         self.send_command(report)
     }
 
+    pub fn fade(&self, r: u8, g: u8, b: u8, speed: u8) -> Result<(), HidError> {
+        let report = [0x00, 0x02, 0xFF, r, g, b, speed, 0x00, 0x00];
+        self.send_command(report)
+    }
+
+    pub fn strobe(&self, r: u8, g: u8, b: u8, speed: u8, repeat: u8) -> Result<(), HidError> {
+        let report = [0x00, 0x03, 0xFF, r, g, b, speed, 0x00, repeat];
+        self.send_command(report)
+    }
+
+    pub fn wave(&self, r: u8, g: u8, b: u8, wave_type: u8, speed: u8, repeat: u8) -> Result<(), HidError> {
+        let report = [0x00, 0x04, wave_type, r, g, b, speed, 0x00, repeat];
+        self.send_command(report)
+    }
+
     pub fn turn_off(&self) -> Result<(), HidError> {
         self.set_color(0, 0, 0)
     }

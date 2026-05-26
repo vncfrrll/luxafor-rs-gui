@@ -1,9 +1,20 @@
-use iced::widget::{button, column, container, row, text, slider, text_input};
+use iced::widget::{button, column, container, radio, row, text, slider, text_input};
 use iced::{Alignment, Color, Element, Length};
-use crate::app::Message;
-use crate::ui::styles;
+use crate::app::{Message, mode::{Mode, WaveType}};
 
-pub fn view<'a>(_connected: bool, status: &str, r: u8, g: u8, b: u8, hex_input: &str, hex_valid: bool) -> Element<'a, Message> {
+pub fn view<'a>(
+    _connected: bool,
+    status: &str,
+    r: u8,
+    g: u8,
+    b: u8,
+    hex_input: &str,
+    hex_valid: bool,
+    mode: &'a Mode,
+    speed: u8,
+    repeat: u8,
+    wave_type: &'a WaveType
+) -> Element<'a, Message> {
     let preview_color = Color::from_rgb(r as f32 / 255.0, g as f32 / 255.0, b as f32 / 255.0);
 
     let preview = container("")
@@ -47,6 +58,77 @@ pub fn view<'a>(_connected: bool, status: &str, r: u8, g: u8, b: u8, hex_input: 
         .spacing(5)
         .align_y(Alignment::Center);
 
+    // Mode selector
+    let mode_selector = row![
+        radio("Static", Mode::Static, Some(mode.clone()), Message::ModeChanged),
+        radio("Fade", Mode::Fade, Some(mode.clone()), Message::ModeChanged),
+        radio("Strobe", Mode::Strobe, Some(mode.clone()), Message::ModeChanged),
+        radio("Wave", Mode::Wave, Some(mode.clone()), Message::ModeChanged),
+    ]
+        .spacing(15)
+        .align_y(Alignment::Center);
+
+    // Mode specific controls
+    let mode_controls = match mode {
+        Mode::Static => column![].spacing(10),
+        Mode::Fade => column![
+            row![
+                text("Speed").width(60),
+                slider(0..=255, speed, Message::SpeedChanged),
+                text(speed.to_string()).width(40),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+        ]
+            .spacing(10),
+        Mode::Strobe => column![
+            row![
+                text("Speed").width(60),
+                slider(0..=255, speed, Message::SpeedChanged),
+                text(speed.to_string()).width(40),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+            row![
+                text("Repeat").width(60),
+                slider(0..=255, repeat, Message::RepeatChanged),
+                text(repeat.to_string()).width(40),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+        ]
+            .spacing(10),
+        Mode::Wave => column![
+            row![
+                text("Speed").width(60),
+                slider(0..=255, speed, Message::SpeedChanged),
+                text(speed.to_string()).width(40),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+            row![
+                text("Repeat").width(60),
+                slider(0..=255, repeat, Message::RepeatChanged),
+                text(repeat.to_string()).width(40),
+            ]
+            .spacing(10)
+            .align_y(Alignment::Center),
+            row(
+                WaveType::all().into_iter().map(|wt| {
+                    radio(
+                        wt.label(),
+                        wt.clone(),
+                        Some(wave_type.clone()),
+                        Message::WaveTypeChanged,
+                    ).into()
+                }).collect::<Vec<_>>()
+            )
+            .spacing(10)
+            .align_y(Alignment::Center),
+        ]
+            .spacing(10),
+    };
+
     let apply_button = button("Apply")
         .on_press(Message::ApplyColor)
         .style(crate::ui::styles::rounded_button);
@@ -74,6 +156,8 @@ pub fn view<'a>(_connected: bool, status: &str, r: u8, g: u8, b: u8, hex_input: 
         g_slider,
         b_slider,
         controls,
+        mode_selector,
+        mode_controls,
         status_text,
     ]
         .spacing(20)
