@@ -1,0 +1,61 @@
+<svg width="100%" viewBox="0 0 680 680" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+<title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Luxafor Control app icon</title>
+<desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">A polished busy flag icon with a vertical pole offset left and a flag with square left corners and rounded right corners</desc>
+<defs>
+  <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#1a1a2e"/>
+    <stop offset="100%" style="stop-color:#16213e"/>
+  </linearGradient>
+  <linearGradient id="flagGrad" x1="280" y1="182" x2="280" y2="390" gradientUnits="userSpaceOnUse">
+    <stop offset="0%" style="stop-color:#e63946"/>
+    <stop offset="100%" style="stop-color:#2dc653"/>
+  </linearGradient>
+  <linearGradient id="poleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" style="stop-color:#555555"/>
+    <stop offset="50%" style="stop-color:#aaaaaa"/>
+    <stop offset="100%" style="stop-color:#777777"/>
+  </linearGradient>
+  <linearGradient id="knobGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" style="stop-color:#cccccc"/>
+    <stop offset="100%" style="stop-color:#888888"/>
+  </linearGradient>
+  <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" style="stop-color:rgba(255,255,255,0.12)"/>
+    <stop offset="60%" style="stop-color:rgba(255,255,255,0.0)"/>
+  </linearGradient>
+  <filter id="softShadow">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="7"/>
+    <feOffset dx="3" dy="4"/>
+    <feComponentTransfer>
+        <feFuncA type="linear" slope="0.45"/>
+    </feComponentTransfer>
+    <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+    </feMerge>
+  </filter>
+  <clipPath id="iconClip">
+    <rect x="90" y="90" width="500" height="500" rx="100"/>
+  </clipPath>
+</defs>
+
+<rect x="90" y="90" width="500" height="500" rx="100" fill="url(#bgGrad)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+<g clip-path="url(#iconClip)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+  <rect x="258" y="150" width="22" height="380" rx="11" fill="url(#poleGrad)" filter="url(#softShadow)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Flag with square left corners, rounded right corners -->
+  <!-- top-left square, top-right rounded, bottom-right rounded, bottom-left square -->
+  <path d="M280,210 L280,390 L280,390 L308,390 Q548,390 548,362 L548,210 Q548,182 520,182 L280,182 L280,210 Z" fill="url(#flagGrad)" filter="url(#softShadow)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <path d="M280,210 L280,390 L280,390 L308,390 Q548,390 548,362 L548,210 Q548,182 520,182 L280,182 L280,210 Z" fill="url(#sheen)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <path d="M280,210 L280,390 L280,390 L308,390 Q548,390 548,362 L548,210 Q548,182 520,182 L280,182 L280,210 Z" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" style="fill:none;stroke:rgba(255, 255, 255, 0.12);color:rgb(0, 0, 0);stroke-width:1.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <circle cx="269" cy="150" r="18" fill="url(#knobGrad)" filter="url(#softShadow)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="269" cy="150" r="7" fill="rgba(255,255,255,0.35)" style="fill:rgba(255, 255, 255, 0.35);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <circle cx="269" cy="530" r="18" fill="url(#knobGrad)" filter="url(#softShadow)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="269" cy="530" r="7" fill="rgba(255,255,255,0.35)" style="fill:rgba(255, 255, 255, 0.35);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+</g>
+
+<rect x="90" y="90" width="500" height="500" rx="100" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="2" style="fill:none;stroke:rgba(255, 255, 255, 0.07);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+</svg>
