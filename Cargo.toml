@@ -8,6 +8,9 @@ iced = { version = "0.14.0", features = ["tokio"]}
 hidapi = "2.6.5"
 tokio = "1.52.3"
 
+[build-dependencies]
+winres = "0.1.12"
+
 [profile.release]
 opt-level = 3
 lto = true
