@@ -1,7 +1,9 @@
 pub mod mode;
 pub use mode::{Mode, WaveType, WaveActiveColor};
 
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use tokio;
 use iced::{Element, Task, Subscription, time};
 use crate::luxafor::LuxaforDevice;
 
@@ -13,17 +15,17 @@ pub enum Message {
     HexChanged(String),
     ApplyColor,
     TurnOff,
-    _CommandSent(Result<(), String>),
     Poll,
     ModeChanged(Mode),
     SpeedChanged(u8),
     RepeatChanged(u8),
     WaveTypeChanged(WaveType),
     WaveActiveColorChanged(WaveActiveColor),
+    CommandResult(Result<String, String>),
 }
 
 pub struct App {
-    device: Option<LuxaforDevice>,
+    device: Option<Arc<Mutex<LuxaforDevice>>>,
     status: String,
     r: u8,
     g: u8,
@@ -41,7 +43,7 @@ pub struct App {
 
 impl Default for App {
     fn default() -> Self {
-        let device = LuxaforDevice::connect().ok();
+        let device = LuxaforDevice::connect().ok().map(|d| Arc::new(Mutex::new(d)));
         let status = if device.is_some() {
             "Device connected.".to_string()
         }
@@ -112,32 +114,47 @@ impl App {
             }
             Message::ApplyColor => {
                 if let Some(device) = &self.device {
-                    let result = match self.mode {
-                        Mode::Static => device.set_color(self.r, self.g, self.b)
-                            .map_err(|e| e.to_string()),
-                        Mode::Fade => device.turn_off()
-                            .and_then(|_| device.fade(self.r, self.g, self.b, self.speed))
-                            .map_err(|e| e.to_string()),
-                        Mode::Strobe => device.strobe(self.r, self.g, self.b, self.speed, self.repeat)
-                            .map_err(|e| e.to_string()),
-                        Mode::Wave => {
-                            let wave_type_byte = self.wave_type.to_byte();
-                            if self.wave_type.uses_two_colors() {
-                                device.set_color(self.wave_color_a.0, self.wave_color_a.1, self.wave_color_a.2)
-                                    .and_then(|_| device.wave(self.wave_color_b.0, self.wave_color_b.1, self.wave_color_b.2, wave_type_byte, self.speed, self.repeat))
-                                    .map_err(|e| e.to_string())
-                            }
-                            else {
-                                device.wave(self.wave_color_b.0, self.wave_color_b.1, self.wave_color_b.2, wave_type_byte, self.speed, self.repeat)
-                                    .map_err(|e| e.to_string())
-                            }
+                    let device = Arc::clone(device);
+                    let r = self.r;
+                    let g = self.g;
+                    let b = self.b;
+                    let speed = self.speed;
+                    let repeat = self.repeat;
+                    let wave_type = self.wave_type;
+                    let mode = self.mode;
+                    let wave_color_a = self.wave_color_a;
+                    let wave_color_b = self.wave_color_b;
 
-                        },
-                    };
-                    self.status = match &result {
-                        Ok(_) => format!("Color set to #{:02X}{:02X}{:02X}", self.r, self.g, self.b),
-                        Err(e) => format!("Error: {}", e),
-                    };
+                    return Task::future(async move {
+                        let result = tokio::task::spawn_blocking(move || {
+                            let device = device.lock().unwrap();
+                            match mode {
+                                Mode::Static => device.set_color(r, g, b)
+                                    .map(|_| format!("Color set to #{:02X}{:02X}{:02X}.", r, g, b))
+                                    .map_err(|e| e.to_string()),
+                                Mode::Fade => device.turn_off()
+                                    .and_then(|_| device.fade(r, g, b, speed))
+                                    .map(|_| format!("Fading to #{:02X}{:02X}{:02X}.", r, g, b))
+                                    .map_err(|e| e.to_string()),
+                                Mode::Strobe => device.strobe(r, g, b, speed, repeat)
+                                    .map(|_| format!("Strobing #{:02X}{:02X}{:02X}.", r, g, b))
+                                    .map_err(|e| e.to_string()),
+                                Mode::Wave => {
+                                    if wave_type.uses_two_colors() {
+                                        device.set_color(wave_color_a.0, wave_color_a.1, wave_color_a.2)
+                                            .and_then(|_| device.wave(wave_color_b.0, wave_color_b.1, wave_color_b.2, wave_type.to_byte(), speed, repeat))
+                                            .map(|_| "Wave started.".to_string())
+                                            .map_err(|e| e.to_string())
+                                    } else {
+                                        device.wave(wave_color_b.0, wave_color_b.1, wave_color_b.2, wave_type.to_byte(), speed, repeat)
+                                            .map(|_| "Wave started.".to_string())
+                                            .map_err(|e| e.to_string())
+                                    }
+                                }
+                            }
+                        }).await.unwrap_or_else(|e| Err(e.to_string()));
+                        Message::CommandResult(result)
+                    });
                 }
                 Task::none()
             }
@@ -187,11 +204,16 @@ impl App {
             }
             Message::TurnOff => {
                 if let Some(device) = &self.device {
-                    let result = device.turn_off().map_err(|e| e.to_string());
-                    self.status = match &result {
-                        Ok(_) => "Turned off.".to_string(),
-                        Err(e) => format!("Turn off error: {}", e),
-                    };
+                    let device = Arc::clone(device);
+                    return Task::future(async move {
+                        let result = tokio::task::spawn_blocking(move || {
+                            let device = device.lock().unwrap();
+                            device.turn_off()
+                                .map(|_| "Turned off.".to_string())
+                                .map_err(|e| e.to_string())
+                        }).await.unwrap_or_else(|e| Err(e.to_string()));
+                        Message::CommandResult(result)
+                    });
                 }
                 Task::none()
             }
@@ -199,7 +221,7 @@ impl App {
                 match &self.device {
                     None => {
                         if let Ok(device) = LuxaforDevice::connect() {
-                            self.device = Some(device);
+                            self.device = Some(Arc::new(Mutex::new(device)));
                             self.status = "Device connected.".to_string();
                         }
                     }
@@ -212,11 +234,8 @@ impl App {
                 }
                 Task::none()
             }
-            Message::_CommandSent(result) => {
-                self.status = match result {
-                    Ok(_) => "Command sent.".to_string(),
-                    Err(e) => format!("Command sent error: {}", e),
-                };
+            Message::CommandResult(result) => {
+                self.status = result.unwrap_or_else(|e| format!("Command sent error: {}", e));
                 Task::none()
             }
         }

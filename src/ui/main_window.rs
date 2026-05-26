@@ -1,5 +1,5 @@
 use iced::widget::{button, column, container, radio, row, slider, text, text_input};
-use iced::{Alignment, Color, Element, Length};
+use iced::{Alignment, Border, Color, Element, Length};
 use crate::app::{Message, mode::{Mode, WaveType, WaveActiveColor}};
 
 pub fn view<'a>(
@@ -25,6 +25,11 @@ pub fn view<'a>(
         .height(50)
         .style(move |_theme| container::Style {
             background: Some(preview_color.into()),
+            border: Border {
+                color: Color::from_rgb(0.5, 0.5, 0.5),
+                width: 2.0,
+                radius: 4.0.into(),
+            },
             ..Default::default()
         });
 
@@ -185,6 +190,11 @@ fn color_preview(color: (u8, u8, u8)) -> container::Container<'static, Message> 
                 color.1 as f32 / 255.0,
                 color.2 as f32 / 255.0,
             ).into()),
+            border: Border {
+                color: Color::from_rgb(0.5, 0.5, 0.5),
+                width: 2.0,
+                radius: 4.0.into()
+            },
             ..Default::default()
         })
 }
