@@ -4,7 +4,11 @@ use crate::luxafor::LuxaforDevice;
 
 #[derive(Debug, Clone)]
 pub enum Message {
-    SetColor(u8, u8, u8),
+    RChanged(u8),
+    GChanged(u8),
+    BChanged(u8),
+    HexChanged(String),
+    ApplyColor,
     TurnOff,
     _CommandSent(Result<(), String>),
     Poll,
@@ -13,6 +17,11 @@ pub enum Message {
 pub struct App {
     device: Option<LuxaforDevice>,
     status: String,
+    r: u8,
+    g: u8,
+    b: u8,
+    hex_input: String,
+    hex_valid: bool,
 }
 
 impl Default for App {
@@ -24,19 +33,54 @@ impl Default for App {
         else {
             "Device not found.".to_string()
         };
-        Self {device, status}
+        Self {
+            device,
+            status,
+            r: 0,
+            g: 0,
+            b: 0,
+            hex_input: "000000".to_string(),
+            hex_valid: true,
+        }
     }
 }
 
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
         match message {
-            Message::SetColor(r, g, b) => {
+            Message::RChanged(r) => {
+                self.update_channel(Some(r), None, None);
+                Task::none()
+            }
+            Message::GChanged(g) => {
+                self.update_channel(None, Some(g), None);
+                Task::none()
+            }
+            Message::BChanged(b) => {
+                self.update_channel(None, None, Some(b));
+                Task::none()
+            }
+            Message::HexChanged(hex) => {
+                self.hex_input = hex.clone();
+                if hex.len() == 6 {
+                    if let Ok(parsed) = u32::from_str_radix(&hex, 16) {
+                        self.r = ((parsed >> 16) & 0xFF) as u8;
+                        self.g = ((parsed >> 8) & 0xFF) as u8;
+                        self.b = (parsed & 0xFF) as u8;
+                        self.hex_valid = true;
+                    } else {
+                        self.hex_valid = false;
+                    }
+                }
+                Task::none()
+            }
+            Message::ApplyColor => {
                 if let Some(device) = &self.device {
-                    let result = device.set_color(r, g, b).map_err(|e| e.to_string());
+                    let result = device.set_color(self.r, self.g, self.b)
+                        .map_err(|e| e.to_string());
                     self.status = match &result {
-                        Ok(_) => "Color set.".to_string(),
-                        Err(e) => format!("Color set error: {}", e),
+                        Ok(_) => format!("Color set to #{:02X}{:02X}{:02X}.", self.r, self.g, self.b),
+                        Err(e) => format!("Error: {}", e),
                     };
                 }
                 Task::none()
@@ -79,10 +123,26 @@ impl App {
     }
 
     pub fn view(&self) -> Element<'_, Message> {
-        crate::ui::main_window::view(self.device.is_some(), &self.status)
+        crate::ui::main_window::view(
+            self.device.is_some(),
+            &self.status,
+            self.r,
+            self.g,
+            self.b,
+            &self.hex_input,
+            self.hex_valid,
+        )
     }
 
     pub fn subscription(&self) -> Subscription<Message> {
         time::every(Duration::from_secs(1)).map(|_| Message::Poll)
+    }
+
+    fn update_channel(&mut self, r: Option<u8>, g: Option<u8>, b: Option<u8>) {
+        if let Some(r) = r { self.r = r; }
+        if let Some(g) = g { self.g = g; }
+        if let Some(b) = b { self.b = b; }
+        self.hex_input = format!("{:02X}{:02X}{:02X}", self.r, self.g, self.b);
+        self.hex_valid = true;
     }
 }
